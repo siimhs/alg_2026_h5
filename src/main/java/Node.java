@@ -176,7 +176,44 @@ public class Node {
       }
    }
 
+   /**
+    * Pseudo-XML representation of the tree rooted at this node. Every node
+    * is enclosed in tags &lt;Ln&gt; ... &lt;/Ln&gt;, where n is the depth of the
+    * node (root has depth 1). A leaf is written on one line, an inner node
+    * puts its children on separate lines, indented by depth.
+    *
+    * @return pseudo-XML text describing the tree structure
+    */
+   public String toXML() {
+      StringBuilder b = new StringBuilder ();
+      appendXml (this, 1, b);
+      return b.toString();
+   }
+
+   /** Appends the pseudo-XML of the subtree with root node at the given depth. */
+   private static void appendXml (Node node, int depth, StringBuilder b) {
+      indent (depth, b);
+      b.append ("<L").append (depth).append ("> ").append (node.name);
+      if (node.firstChild == null) {
+         b.append (" </L").append (depth).append (">\n");
+         return;
+      }
+      b.append ('\n');
+      for (Node child = node.firstChild; child != null; child = child.nextSibling)
+         appendXml (child, depth + 1, b);
+      indent (depth, b);
+      b.append ("</L").append (depth).append (">\n");
+   }
+
+   /** Appends indentation for a node at the given depth. */
+   private static void indent (int depth, StringBuilder b) {
+      for (int k = 1; k < depth; k++) b.append ("    ");
+   }
+
    public static void main (String[] param) {
+      System.out.print (Node.parsePostfix ("((C)B,(E,F)D,G)A").toXML());
+      System.out.print (Node.parsePostfix ("A").toXML());
+
       String[] valid = {
          "(B1,C)A",
          "A",
